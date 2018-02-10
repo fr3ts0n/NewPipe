@@ -1,22 +1,19 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<resources><string name="background_player_name">Фоновий програвач NewPipe</string>
+<resources>
     <string name="view_count_text">%1$s переглядів</string>
-    <string name="upload_date_text">Завантажений %1$s</string>
-    <string name="no_player_found">Потоковий програвач не знайдено. Встановити VLC?</string>
+    <string name="upload_date_text">Опубліковано %1$s</string>
+    <string name="no_player_found">Потоковий програвач не знайдено. Бажаєте встановити VLC?</string>
     <string name="install">Встановити</string>
     <string name="cancel">Скасувати</string>
     <string name="open_in_browser">Відкрити в браузері</string>
     <string name="share">Поділитись</string>
-    <string name="loading">Завантаження</string>
     <string name="download">Завантажити</string>
     <string name="search">Пошук</string>
     <string name="settings">Налаштування</string>
     <string name="did_you_mean">Ви мали на увазі: %1$s ?</string>
-    <string name="search_page">"Пошукова сторінка: "</string>
     <string name="share_dialog_title">Поділитись з</string>
     <string name="choose_browser">Виберіть браузер</string>
     <string name="screen_rotation">обертання</string>
-    <string name="settings_activity_title">Налаштування</string>
     <string name="use_external_video_player_title">Використовувати зовнішній відео програвач</string>
     <string name="use_external_audio_player_title">Використовувати зовнішній аудіо програвач</string>
 
@@ -27,10 +24,10 @@
 
     <string name="download_path_summary">Шлях де будуть зберігатись завантажені відео.</string>
     <string name="download_path_audio_title">Шлях для завантаження аудіо</string>
-    <string name="download_path_audio_summary">Шлях де будуть зберігатись завантажені аудіо файли.</string>
+    <string name="download_path_audio_summary">Шлях де будуть зберігатись завантажені аудіо файли</string>
     <string name="autoplay_by_calling_app_title">Автоматично відтворювати при виклику з іншого додатку</string>
     <string name="autoplay_by_calling_app_summary">Автоматично відтворювати відео коли NewPipe викликано з іншого додатку.</string>
-    <string name="default_resolution_title">Роздільна здатність за замовчуванням</string>
+    <string name="default_resolution_title">Типова роздільна здатність</string>
     <string name="play_with_kodi_title">Відтворювати за допомогою Kodi</string>
     <string name="kore_not_found">Додаток Kore не знайдено. Встановити?</string>
     <string name="show_play_with_kodi_title">Показувати опцію \"Програвати за допомогою Kodi\"</string>
@@ -47,17 +44,14 @@
     <string name="next_video_title">Наступне відео</string>
     <string name="show_next_and_similar_title">Показувати наступні та схожі відео</string>
     <string name="url_not_supported_toast">URL не підтримується</string>
-    <string name="similar_videos_btn_text">Схожі відео</string>
-    <string name="search_language_title">Мова контенту</string>
+    <string name="search_language_title">Переважна мова контенту</string>
     <string name="settings_category_video_audio_title">Відео та Аудіо</string>
     <string name="settings_category_appearance_title">Зовнішній вигляд</string>
     <string name="settings_category_other_title">Інше</string>
     <string name="background_player_playing_toast">Відтворення у фоновому режимі</string>
     <string name="play_btn_text">Відтворити</string>
     <string name="storage_permission_denied">В доступі відмовлено</string>
-    <string name="use_exoplayer_title">Використовувати ExoPlayer</string>
-    <string name="use_exoplayer_summary">Експериментальний</string>
-<string name="content">Контент</string>
+    <string name="content">Контент</string>
     <string name="show_age_restricted_content_title">Показувати контент з віковим обмеженням</string>
     <string name="video_is_age_restricted">Відео має вікові обмеження. Спершу активуйте опцію для відображення таких відео в налаштуваннях.</string>
     <string name="duration_live">наживо</string>
@@ -79,4 +73,56 @@
     <string name="error_snackbar_action">ЗВІТУВАТИ</string>
     <string name="what_device_headline">Інформація:</string>
     <string name="what_happened_headline">Що сталося:</string>
-    </resources>
+    <string name="main_bg_subtitle">Натисніть Пошук для початку</string>
+    <string name="black_theme_title">Чорна</string>
+
+    <string name="downloads">Завантаження</string>
+    <string name="downloads_title">Завантаження</string>
+    <string name="error_report_title">Звіт про помилку</string>
+    <string name="all">Все</string>
+    <string name="channel">Канал</string>
+    <string name="yes">Так</string>
+    <string name="later">Пізніше</string>
+    <string name="disabled">Вимкнено</string>
+
+    <string name="could_not_load_image">Не вдалося завантажити зображення</string>
+    <string name="app_ui_crash">Додаток/інтерфейс зазнав краху</string>
+    <string name="your_comment">Ваші коментарі (Англійською):</string>
+    <string name="error_details_headline">Деталі:</string>
+
+
+    <string name="list_thumbnail_view_description">Мініатюра попереднього перегляду відео</string>
+    <string name="detail_thumbnail_view_description">Мініатюра попереднього перегляду відео</string>
+    <string name="use_tor_title">Використовувати Tor</string>
+    <string name="use_tor_summary">(Експериментально) Перенаправляти трафік через Tor для підвищення конфіденційності (трансляція відео ще не підтримується).</string>
+    <string name="report_error">Звітувати про помилку</string>
+    <string name="err_dir_create">Не вдалося створити теку для завантаження \'%1$s\'</string>
+    <string name="info_dir_created">Створити теку для завантаження \'%1$s\'</string>
+
+    <string name="video">Відео</string>
+    <string name="audio">Аудіо</string>
+    <string name="retry">Повторити</string>
+    <string name="use_old_player_title">Використовувати старий плеер</string>
+    <string name="short_thousand">К</string>
+    <string name="short_million">М</string>
+    <string name="short_billion">Б</string>
+
+    <string name="start">Почати</string>
+    <string name="pause">Пауза</string>
+    <string name="view">Відтворити</string>
+    <string name="delete">Видалити</string>
+    <string name="checksum">Контрольна сума</string>
+
+    <string name="finish">Гаразд</string>
+    <string name="msg_name">Назва файлу</string>
+    <string name="msg_threads">Потоки</string>
+    <string name="msg_error">Помилка</string>
+    <string name="msg_server_unsupported">Сервер не підтримується</string>
+    <string name="msg_exists">Файл вже існує</string>
+    <string name="msg_running">NewPipe завантажує</string>
+    <string name="msg_running_detail">Натисніть для подробиць</string>
+    <string name="msg_wait">Будь ласка, зачекайте…</string>
+    <string name="msg_copied">Скопійовано до буферу обміну.</string>
+    <string name="no_available_dir">Будь ласка, оберіть теку для завантаження.</string>
+
+</resources>

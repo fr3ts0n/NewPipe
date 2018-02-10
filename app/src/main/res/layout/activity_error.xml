@@ -5,10 +5,13 @@
     android:layout_height="match_parent"
     tools:context=".report.ErrorActivity">
 
+    <include layout="@layout/toolbar_layout"/>
+
     <ScrollView
         android:id="@+id/scrollView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:layout_marginTop="?attr/actionBarSize">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -42,7 +45,7 @@
                 android:id="@+id/errorMessageView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@android:color/black"
+                android:textColor="?attr/colorAccent"
                 android:text="@string/info_labels"/>
 
             <TextView
@@ -63,7 +66,7 @@
                     android:id="@+id/errorInfoLabelsView"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textColor="@android:color/black"
+                    android:textColor="?attr/colorAccent"
                     android:text="@string/info_labels"/>
 
                 <HorizontalScrollView

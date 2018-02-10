@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<resources><string name="background_player_name">NewPipe Background Player</string>
+<resources>
     <string name="view_count_text">%1$s προβολές</string>
     <string name="upload_date_text">Ανέβηκε στις %1$s</string>
     <string name="no_player_found">Δεν βρέθηκε πρόγραμμα αναπαραγωγής. Εγκατάσταση του VLC;</string>
@@ -7,16 +7,13 @@
     <string name="cancel">Ακύρωση</string>
     <string name="open_in_browser">Άνοιγμα στον browser</string>
     <string name="share">Κοινοποίηση</string>
-    <string name="loading">Φορτώνει</string>
     <string name="download">Λήψη</string>
     <string name="search">Αναζήτηση</string>
     <string name="settings">Ρυθμίσεις</string>
-    <string name="did_you_mean">"Μήπως εννοείτε: "</string>
-    <string name="search_page">"Αναζήτηση σελίδας: "</string>
+    <string name="did_you_mean">"Μήπως εννοείτε: %1$s ?"</string>
     <string name="share_dialog_title">Κοινοποίηση με</string>
     <string name="choose_browser">Επιλέξτε browser</string>
     <string name="screen_rotation">περιστροφή</string>
-    <string name="settings_activity_title">Ρυθμίσεις</string>
     <string name="use_external_video_player_title">Χρήση εξωτερικού video player</string>
     <string name="use_external_audio_player_title">Χρήση εξωτερικού audio player</string>
 
@@ -28,8 +25,6 @@
     <string name="download_path_audio_summary">Διαδρομή για αποθήκευση αρχείων ήχου</string>
     <string name="download_path_audio_dialog_title">Εισάγετε διαδρομή για λήψη αρχείων ήχου.</string>
 
-    <string name="autoplay_through_intent_title">Αυτόματη αναπαραγωγή μέσω Intent</string>
-    <string name="autoplay_through_intent_summary">Αυτόματη αναπαραγωγή video όταν καλείται από άλλη εφαρμογή.</string>
     <string name="default_resolution_title">Προεπιλεγμένη ανάλυση</string>
     <string name="play_with_kodi_title">Αναπαραγωγή με το Kodi</string>
     <string name="kore_not_found">Η εφαρμογή Kore δεν βρέθηκε. Εγκατάσταση;</string>
@@ -47,7 +42,6 @@
     <string name="next_video_title">Επόμενο video</string>
     <string name="show_next_and_similar_title">Προβολή επόμενου και σχετικών video</string>
     <string name="url_not_supported_toast">Δεν υποστηρίζεται η διεύθυνση URL</string>
-    <string name="similar_videos_btn_text">Σχετικά video</string>
     <string name="search_language_title">Προτιμώμενη γλώσσα περιεχομένου</string>
     <string name="settings_category_video_audio_title">Video &amp; Ήχος</string>
     <string name="settings_category_appearance_title">Εμφάνιση</string>
@@ -66,4 +60,6 @@
 
     <string name="err_dir_create">Δεν μπόρεσε να δημιουργηθεί ο φάκελος \'%1$s\'</string>
     <string name="info_dir_created">Δημιουργήθηκε ο φάκελος \'%1$s\'</string>
-</resources>
+<string name="short_billion">Δ</string>
+
+    </resources>

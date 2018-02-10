@@ -1,23 +1,21 @@
 package org.schabi.newpipe.settings;
 
 import android.content.Context;
-import android.content.Intent;
-import android.content.res.Configuration;
 import android.os.Bundle;
-import android.preference.PreferenceActivity;
-import android.support.annotation.LayoutRes;
-import android.support.annotation.NonNull;
+import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatDelegate;
-import android.view.MenuInflater;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.preference.Preference;
+import android.support.v7.preference.PreferenceFragmentCompat;
+import android.support.v7.widget.Toolbar;
+import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
 
 import org.schabi.newpipe.R;
+import org.schabi.newpipe.util.ThemeHelper;
 
 
-/**
+/*
  * Created by Christian Schabesberger on 31.08.15.
  *
  * Copyright (C) Christian Schabesberger 2015 <chris.schabesberger@mailbox.org>
@@ -37,119 +35,56 @@ import org.schabi.newpipe.R;
  * along with NewPipe.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-public class SettingsActivity extends PreferenceActivity  {
-    private AppCompatDelegate mDelegate = null;
-    SettingsFragment f = new SettingsFragment();
+public class SettingsActivity extends AppCompatActivity implements BasePreferenceFragment.OnPreferenceStartFragmentCallback {
+
+    public static void initSettings(Context context) {
+        NewPipeSettings.initSettings(context);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceBundle) {
-        getDelegate().installViewFactory();
-        getDelegate().onCreate(savedInstanceBundle);
+        ThemeHelper.setTheme(this);
         super.onCreate(savedInstanceBundle);
+        setContentView(R.layout.settings_layout);
 
-        ActionBar actionBar = getSupportActionBar();
-        actionBar.setDisplayHomeAsUpEnabled(true);
-        actionBar.setTitle(R.string.settings_title);
-        actionBar.setDisplayShowTitleEnabled(true);
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
 
-        getFragmentManager().beginTransaction()
-                .replace(android.R.id.content, f)
-                .commit();
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        f.onActivityResult(requestCode, resultCode, data);
-    }
-
-    @Override
-    protected void onPostCreate(Bundle savedInstanceState) {
-        super.onPostCreate(savedInstanceState);
-        getDelegate().onPostCreate(savedInstanceState);
-    }
-
-    private ActionBar getSupportActionBar() {
-        return getDelegate().getSupportActionBar();
-    }
-
-    @NonNull
-    @Override
-    public MenuInflater getMenuInflater() {
-        return getDelegate().getMenuInflater();
-    }
-
-    @Override
-    public void setContentView(@LayoutRes int layoutResID) {
-        getDelegate().setContentView(layoutResID);
-    }
-
-    @Override
-    public void setContentView(View view) {
-        getDelegate().setContentView(view);
-    }
-
-    @Override
-    public void setContentView(View view, ViewGroup.LayoutParams params) {
-        getDelegate().setContentView(view, params);
-    }
-
-    @Override
-    public void addContentView(View view, ViewGroup.LayoutParams params) {
-        getDelegate().addContentView(view, params);
-    }
-
-    @Override
-    protected void onPostResume() {
-        super.onPostResume();
-        getDelegate().onPostResume();
-    }
-
-    @Override
-    protected void onTitleChanged(CharSequence title, int color) {
-        super.onTitleChanged(title, color);
-        getDelegate().setTitle(title);
-    }
-
-    @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-        getDelegate().onConfigurationChanged(newConfig);
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        getDelegate().onStop();
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        getDelegate().onDestroy();
-    }
-
-    public void invalidateOptionsMenu() {
-        getDelegate().invalidateOptionsMenu();
-    }
-
-    private AppCompatDelegate getDelegate() {
-        if (mDelegate == null) {
-            mDelegate = AppCompatDelegate.create(this, null);
+        if (savedInstanceBundle == null) {
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.fragment_holder, new MainSettingsFragment())
+                    .commit();
         }
-        return mDelegate;
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.setDisplayShowTitleEnabled(true);
+        }
+
+        return super.onCreateOptionsMenu(menu);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-        if(id == android.R.id.home) {
+        if (id == android.R.id.home) {
             finish();
         }
         return true;
     }
 
-    public static void initSettings(Context context) {
-        NewPipeSettings.initSettings(context);
+    @Override
+    public boolean onPreferenceStartFragment(PreferenceFragmentCompat caller, Preference preference) {
+        Fragment fragment = Fragment.instantiate(this, preference.getFragment(), preference.getExtras());
+        getSupportFragmentManager().beginTransaction()
+                .setCustomAnimations(R.animator.custom_fade_in, R.animator.custom_fade_out, R.animator.custom_fade_in, R.animator.custom_fade_out)
+                .replace(R.id.fragment_holder, fragment)
+                .addToBackStack(null)
+                .commit();
+        return true;
     }
 }

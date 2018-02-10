@@ -1,4 +1,4 @@
-/**
+/*
  * Created by k3b on 07.01.2016.
  *
  * Copyright (C) Christian Schabesberger 2015 <chris.schabesberger@mailbox.org>
@@ -30,13 +30,11 @@ import org.schabi.newpipe.R;
 
 import java.io.File;
 
-import us.shandian.giga.util.Utility;
-
 /**
  * Helper for global settings
  */
 
-/**
+/*
  * Copyright (C) Christian Schabesberger 2016 <chris.schabesberger@mailbox.org>
  * NewPipeSettings.java is part of NewPipe.
  *
@@ -60,7 +58,13 @@ public class NewPipeSettings {
     }
 
     public static void initSettings(Context context) {
-        PreferenceManager.setDefaultValues(context, R.xml.settings, false);
+        PreferenceManager.setDefaultValues(context, R.xml.appearance_settings, true);
+        PreferenceManager.setDefaultValues(context, R.xml.content_settings, true);
+        PreferenceManager.setDefaultValues(context, R.xml.download_settings, true);
+        PreferenceManager.setDefaultValues(context, R.xml.history_settings, true);
+        PreferenceManager.setDefaultValues(context, R.xml.main_settings, true);
+        PreferenceManager.setDefaultValues(context, R.xml.video_audio_settings, true);
+
         getVideoDownloadFolder(context);
         getAudioDownloadFolder(context);
     }
@@ -72,9 +76,7 @@ public class NewPipeSettings {
     public static String getVideoDownloadPath(Context context) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         final String key = context.getString(R.string.download_path_key);
-        String downloadPath = prefs.getString(key, Environment.DIRECTORY_MOVIES);
-
-        return downloadPath;
+        return prefs.getString(key, Environment.DIRECTORY_MOVIES);
     }
 
     public static File getAudioDownloadFolder(Context context) {
@@ -84,9 +86,7 @@ public class NewPipeSettings {
     public static String getAudioDownloadPath(Context context) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         final String key = context.getString(R.string.download_path_audio_key);
-        String downloadPath = prefs.getString(key, Environment.DIRECTORY_MUSIC);
-
-        return downloadPath;
+        return prefs.getString(key, Environment.DIRECTORY_MUSIC);
     }
 
     private static File getFolder(Context context, int keyID, String defaultDirectoryName) {
@@ -97,14 +97,13 @@ public class NewPipeSettings {
 
         final File folder = getFolder(defaultDirectoryName);
         SharedPreferences.Editor spEditor = prefs.edit();
-        spEditor.putString(key
-                , new File(folder,"NewPipe").getAbsolutePath());
+        spEditor.putString(key, new File(folder, "NewPipe").getAbsolutePath());
         spEditor.apply();
         return folder;
     }
 
     @NonNull
     private static File getFolder(String defaultDirectoryName) {
-        return new File(Environment.getExternalStorageDirectory(),defaultDirectoryName);
+        return new File(Environment.getExternalStorageDirectory(), defaultDirectoryName);
     }
 }

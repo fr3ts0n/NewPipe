@@ -1,5 +1,3 @@
-
-
 package org.schabi.newpipe.report;
 
 import android.app.Activity;
@@ -8,15 +6,18 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Bundle;
+import android.os.Handler;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.preference.PreferenceManager;
+import android.support.annotation.Nullable;
+import android.support.annotation.StringRes;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
-import android.os.Handler;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -35,7 +36,8 @@ import org.schabi.newpipe.BuildConfig;
 import org.schabi.newpipe.Downloader;
 import org.schabi.newpipe.MainActivity;
 import org.schabi.newpipe.R;
-import org.schabi.newpipe.extractor.Parser;
+import org.schabi.newpipe.extractor.utils.Parser;
+import org.schabi.newpipe.util.ThemeHelper;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -45,7 +47,7 @@ import java.util.List;
 import java.util.TimeZone;
 import java.util.Vector;
 
-/**
+/*
  * Created by Christian Schabesberger on 24.10.15.
  *
  * Copyright (C) Christian Schabesberger 2016 <chris.schabesberger@mailbox.org>
@@ -66,94 +68,20 @@ import java.util.Vector;
  */
 
 public class ErrorActivity extends AppCompatActivity {
-    public static class ErrorInfo implements Parcelable {
-        public int userAction;
-        public String request;
-        public String serviceName;
-        public int message;
-
-        public static ErrorInfo make(int userAction, String serviceName, String request, int message) {
-            ErrorInfo info = new ErrorInfo();
-            info.userAction = userAction;
-            info.serviceName = serviceName;
-            info.request = request;
-            info.message = message;
-            return info;
-        }
-
-        @Override
-        public int describeContents() {
-            return 0;
-        }
-
-        @Override
-        public void writeToParcel(Parcel dest, int flags) {
-            dest.writeInt(this.userAction);
-            dest.writeString(this.request);
-            dest.writeString(this.serviceName);
-            dest.writeInt(this.message);
-        }
-
-        public ErrorInfo() {
-        }
-
-        protected ErrorInfo(Parcel in) {
-            this.userAction = in.readInt();
-            this.request = in.readString();
-            this.serviceName = in.readString();
-            this.message = in.readInt();
-        }
-
-        public static final Parcelable.Creator<ErrorInfo> CREATOR = new Parcelable.Creator<ErrorInfo>() {
-            @Override
-            public ErrorInfo createFromParcel(Parcel source) {
-                return new ErrorInfo(source);
-            }
-
-            @Override
-            public ErrorInfo[] newArray(int size) {
-                return new ErrorInfo[size];
-            }
-        };
-    }
-
     // LOG TAGS
     public static final String TAG = ErrorActivity.class.toString();
-
     // BUNDLE TAGS
     public static final String ERROR_INFO = "error_info";
     public static final String ERROR_LIST = "error_list";
 
-    // MESSAGE ID
-    public static final int SEARCHED = 0;
-    public static final int REQUESTED_STREAM = 1;
-    public static final int GET_SUGGESTIONS = 2;
-    public static final int SOMETHING_ELSE = 3;
-    public static final int USER_REPORT = 4;
-    public static final int LOAD_IMAGE = 5;
-    public static final int UI_ERROR = 6;
-    public static final int REQUESTED_CHANNEL = 7;
-
-    // MESSAGE STRING
-    public static final String SEARCHED_STRING = "searched";
-    public static final String REQUESTED_STREAM_STRING = "requested stream";
-    public static final String GET_SUGGESTIONS_STRING = "get suggestions";
-    public static final String SOMETHING_ELSE_STRING = "something";
-    public static final String USER_REPORT_STRING = "user report";
-    public static final String LOAD_IMAGE_STRING = "load image";
-    public static final String UI_ERROR_STRING = "ui error";
-    public static final String REQUESTED_CHANNEL_STRING = "requested channel";
-
     public static final String ERROR_EMAIL_ADDRESS = "crashreport@newpipe.schabi.org";
     public static final String ERROR_EMAIL_SUBJECT = "Exception in NewPipe " + BuildConfig.VERSION_NAME;
-
+    Thread globIpRangeThread;
     private String[] errorList;
     private ErrorInfo errorInfo;
     private Class returnActivity;
     private String currentTimeStamp;
     private String globIpRange;
-    Thread globIpRangeThread;
-
     // views
     private TextView errorView;
     private EditText userCommentBox;
@@ -161,62 +89,65 @@ public class ErrorActivity extends AppCompatActivity {
     private TextView infoView;
     private TextView errorMessageView;
 
-    public static void reportError(final Context context, final List<Throwable> el,
-                                   final Class returnAcitivty, View rootView, final ErrorInfo errorInfo) {
+    public static void reportUiError(final AppCompatActivity activity, final Throwable el) {
+        reportError(activity, el, activity.getClass(), null, ErrorInfo.make(UserAction.UI_ERROR, "none", "", R.string.app_ui_crash));
+    }
 
+    public static void reportError(final Context context, final List<Throwable> el,
+                                   final Class returnActivity, View rootView, final ErrorInfo errorInfo) {
         if (rootView != null) {
-            Snackbar.make(rootView, R.string.error_snackbar_message, Snackbar.LENGTH_LONG)
+            Snackbar.make(rootView, R.string.error_snackbar_message, 15 * 1000)
                     .setActionTextColor(Color.YELLOW)
                     .setAction(R.string.error_snackbar_action, new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            ActivityCommunicator ac = ActivityCommunicator.getCommunicator();
-                            ac.returnActivity = returnAcitivty;
-                            Intent intent = new Intent(context, ErrorActivity.class);
-                            intent.putExtra(ERROR_INFO, errorInfo);
-                            intent.putExtra(ERROR_LIST, elToSl(el));
-                            context.startActivity(intent);
+                            startErrorActivity(returnActivity, context, errorInfo, el);
                         }
                     }).show();
         } else {
-            ActivityCommunicator ac = ActivityCommunicator.getCommunicator();
-            ac.returnActivity = returnAcitivty;
-            Intent intent = new Intent(context, ErrorActivity.class);
-            intent.putExtra(ERROR_INFO, errorInfo);
-            intent.putExtra(ERROR_LIST, elToSl(el));
-            context.startActivity(intent);
+            startErrorActivity(returnActivity, context, errorInfo, el);
         }
     }
 
+    private static void startErrorActivity(Class returnActivity, Context context, ErrorInfo errorInfo, List<Throwable> el) {
+        ActivityCommunicator ac = ActivityCommunicator.getCommunicator();
+        ac.returnActivity = returnActivity;
+        Intent intent = new Intent(context, ErrorActivity.class);
+        intent.putExtra(ERROR_INFO, errorInfo);
+        intent.putExtra(ERROR_LIST, elToSl(el));
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        context.startActivity(intent);
+    }
+
     public static void reportError(final Context context, final Throwable e,
-                                   final Class returnAcitivty, View rootView, final ErrorInfo errorInfo) {
+                                   final Class returnActivity, View rootView, final ErrorInfo errorInfo) {
         List<Throwable> el = null;
-        if(e != null) {
+        if (e != null) {
             el = new Vector<>();
             el.add(e);
         }
-        reportError(context, el, returnAcitivty, rootView, errorInfo);
+        reportError(context, el, returnActivity, rootView, errorInfo);
     }
 
     // async call
     public static void reportError(Handler handler, final Context context, final Throwable e,
-                                   final Class returnAcitivty, final View rootView, final ErrorInfo errorInfo) {
+                                   final Class returnActivity, final View rootView, final ErrorInfo errorInfo) {
 
         List<Throwable> el = null;
-        if(e != null) {
+        if (e != null) {
             el = new Vector<>();
             el.add(e);
         }
-        reportError(handler, context, el, returnAcitivty, rootView, errorInfo);
+        reportError(handler, context, el, returnActivity, rootView, errorInfo);
     }
 
     // async call
     public static void reportError(Handler handler, final Context context, final List<Throwable> el,
-                                   final Class returnAcitivty, final View rootView, final ErrorInfo errorInfo) {
+                                   final Class returnActivity, final View rootView, final ErrorInfo errorInfo) {
         handler.post(new Runnable() {
             @Override
             public void run() {
-                reportError(context, el, returnAcitivty, rootView, errorInfo);
+                reportError(context, el, returnActivity, rootView, errorInfo);
             }
         });
     }
@@ -224,49 +155,66 @@ public class ErrorActivity extends AppCompatActivity {
     public static void reportError(final Context context, final CrashReportData report, final ErrorInfo errorInfo) {
         // get key first (don't ask about this solution)
         ReportField key = null;
-        for(ReportField k : report.keySet()) {
-            if(k.toString().equals("STACK_TRACE")) {
+        for (ReportField k : report.keySet()) {
+            if (k.toString().equals("STACK_TRACE")) {
                 key = k;
             }
         }
-        String[] el = new String[] { report.get(key) };
+        String[] el = new String[]{report.get(key).toString()};
 
         Intent intent = new Intent(context, ErrorActivity.class);
         intent.putExtra(ERROR_INFO, errorInfo);
         intent.putExtra(ERROR_LIST, el);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         context.startActivity(intent);
+    }
+
+    private static String getStackTrace(final Throwable throwable) {
+        final StringWriter sw = new StringWriter();
+        final PrintWriter pw = new PrintWriter(sw, true);
+        throwable.printStackTrace(pw);
+        return sw.getBuffer().toString();
+    }
+
+    // errorList to StringList
+    private static String[] elToSl(List<Throwable> stackTraces) {
+        String[] out = new String[stackTraces.size()];
+        for (int i = 0; i < stackTraces.size(); i++) {
+            out[i] = getStackTrace(stackTraces.get(i));
+        }
+        return out;
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        ThemeHelper.setTheme(this);
         setContentView(R.layout.activity_error);
 
         Intent intent = getIntent();
 
-        try {
-            ActionBar actionBar = getSupportActionBar();
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
             actionBar.setTitle(R.string.error_report_title);
             actionBar.setDisplayShowTitleEnabled(true);
-        } catch (Throwable e) {
-            Log.e(TAG, "Error turing exception handling");
-            e.printStackTrace();
         }
 
-        reportButton = (Button) findViewById(R.id.errorReportButton);
-        userCommentBox = (EditText) findViewById(R.id.errorCommentBox);
-        errorView = (TextView) findViewById(R.id.errorView);
-        infoView = (TextView) findViewById(R.id.errorInfosView);
-        errorMessageView = (TextView) findViewById(R.id.errorMessageView);
+        reportButton = findViewById(R.id.errorReportButton);
+        userCommentBox = findViewById(R.id.errorCommentBox);
+        errorView = findViewById(R.id.errorView);
+        infoView = findViewById(R.id.errorInfosView);
+        errorMessageView = findViewById(R.id.errorMessageView);
 
         ActivityCommunicator ac = ActivityCommunicator.getCommunicator();
         returnActivity = ac.returnActivity;
         errorInfo = intent.getParcelableExtra(ERROR_INFO);
         errorList = intent.getStringArrayExtra(ERROR_LIST);
 
-                //importand add gurumeditaion
+        // important add guru meditation
         addGuruMeditaion();
         currentTimeStamp = getCurrentTimeStamp();
 
@@ -284,12 +232,12 @@ public class ErrorActivity extends AppCompatActivity {
         });
         reportButton.setEnabled(false);
 
-        globIpRangeThread = new Thread(new IpRagneRequester());
+        globIpRangeThread = new Thread(new IpRangeRequester());
         globIpRangeThread.start();
 
         // normal bugreport
         buildInfo(errorInfo);
-        if(errorInfo.message != 0) {
+        if (errorInfo.message != 0) {
             errorMessageView.setText(errorInfo.message);
         } else {
             errorMessageView.setVisibility(View.GONE);
@@ -297,6 +245,11 @@ public class ErrorActivity extends AppCompatActivity {
         }
 
         errorView.setText(formErrorText(errorList));
+
+        //print stack trace once again for debugging:
+        for (String e : errorList) {
+            Log.e(TAG, e);
+        }
     }
 
     @Override
@@ -325,16 +278,9 @@ public class ErrorActivity extends AppCompatActivity {
         return false;
     }
 
-    private static String getStackTrace(final Throwable throwable) {
-        final StringWriter sw = new StringWriter();
-        final PrintWriter pw = new PrintWriter(sw, true);
-        throwable.printStackTrace(pw);
-        return sw.getBuffer().toString();
-    }
-
     private String formErrorText(String[] el) {
         String text = "";
-        if(el != null) {
+        if (el != null) {
             for (String e : el) {
                 text += "-------------------------------------\n"
                         + e;
@@ -344,25 +290,39 @@ public class ErrorActivity extends AppCompatActivity {
         return text;
     }
 
+    /**
+     * Get the checked activity.
+     *
+     * @param returnActivity the activity to return to
+     * @return the casted return activity or null
+     */
+    @Nullable
+    static Class<? extends Activity> getReturnActivity(Class<?> returnActivity) {
+        Class<? extends Activity> checkedReturnActivity = null;
+        if (returnActivity != null) {
+            if (Activity.class.isAssignableFrom(returnActivity)) {
+                checkedReturnActivity = returnActivity.asSubclass(Activity.class);
+            } else {
+                checkedReturnActivity = MainActivity.class;
+            }
+        }
+        return checkedReturnActivity;
+    }
+
     private void goToReturnActivity() {
-        if (returnActivity == null) {
+        Class<? extends Activity> checkedReturnActivity = getReturnActivity(returnActivity);
+        if (checkedReturnActivity == null) {
             super.onBackPressed();
         } else {
-            Intent intent;
-            if (returnActivity != null &&
-                    returnActivity.isAssignableFrom(Activity.class)) {
-                intent = new Intent(this, returnActivity);
-            } else {
-                intent = new Intent(this, MainActivity.class);
-            }
+            Intent intent = new Intent(this, checkedReturnActivity);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             NavUtils.navigateUpTo(this, intent);
         }
     }
 
     private void buildInfo(ErrorInfo info) {
-        TextView infoLabelView = (TextView) findViewById(R.id.errorInfoLabelsView);
-        TextView infoView = (TextView) findViewById(R.id.errorInfosView);
+        TextView infoLabelView = findViewById(R.id.errorInfoLabelsView);
+        TextView infoView = findViewById(R.id.errorInfosView);
         String text = "";
 
         infoLabelView.setText(getString(R.string.info_labels).replace("\\n", "\n"));
@@ -394,7 +354,7 @@ public class ErrorActivity extends AppCompatActivity {
                     .put("ip_range", globIpRange);
 
             JSONArray exceptionArray = new JSONArray();
-            if(errorList != null) {
+            if (errorList != null) {
                 for (String e : errorList) {
                     exceptionArray.put(e);
                 }
@@ -412,32 +372,17 @@ public class ErrorActivity extends AppCompatActivity {
         return "";
     }
 
-    private String getUserActionString(int userAction) {
-        switch (userAction) {
-            case REQUESTED_STREAM:
-                return REQUESTED_STREAM_STRING;
-            case SEARCHED:
-                return SEARCHED_STRING;
-            case GET_SUGGESTIONS:
-                return GET_SUGGESTIONS_STRING;
-            case SOMETHING_ELSE:
-                return SOMETHING_ELSE_STRING;
-            case USER_REPORT:
-                return USER_REPORT_STRING;
-            case LOAD_IMAGE:
-                return LOAD_IMAGE_STRING;
-            case UI_ERROR:
-                return UI_ERROR_STRING;
-            case REQUESTED_CHANNEL:
-                return REQUESTED_CHANNEL_STRING;
-            default:
-                return "Your description is in another castle.";
+    private String getUserActionString(UserAction userAction) {
+        if (userAction == null) {
+            return "Your description is in another castle.";
+        } else {
+            return userAction.getMessage();
         }
     }
 
     private String getContentLangString() {
         return PreferenceManager.getDefaultSharedPreferences(this)
-                .getString(this.getString(R.string.search_language_key), "none");
+                .getString(this.getString(R.string.content_country_key), "none");
     }
 
     private String getOsString() {
@@ -450,7 +395,7 @@ public class ErrorActivity extends AppCompatActivity {
 
     private void addGuruMeditaion() {
         //just an easter egg
-        TextView sorryView = (TextView) findViewById(R.id.errorSorryView);
+        TextView sorryView = findViewById(R.id.errorSorryView);
         String text = sorryView.getText().toString();
         text += "\n" + getString(R.string.guru_meditation);
         sorryView.setText(text);
@@ -468,49 +413,90 @@ public class ErrorActivity extends AppCompatActivity {
         return df.format(new Date());
     }
 
-    private class IpRagneRequester implements Runnable {
+    public static class ErrorInfo implements Parcelable {
+        public static final Parcelable.Creator<ErrorInfo> CREATOR = new Parcelable.Creator<ErrorInfo>() {
+            @Override
+            public ErrorInfo createFromParcel(Parcel source) {
+                return new ErrorInfo(source);
+            }
+
+            @Override
+            public ErrorInfo[] newArray(int size) {
+                return new ErrorInfo[size];
+            }
+        };
+        final public UserAction userAction;
+        final public String request;
+        final public String serviceName;
+        @StringRes
+        final public int message;
+
+        private ErrorInfo(UserAction userAction, String serviceName, String request, @StringRes int message) {
+            this.userAction = userAction;
+            this.serviceName = serviceName;
+            this.request = request;
+            this.message = message;
+        }
+
+        protected ErrorInfo(Parcel in) {
+            this.userAction = UserAction.valueOf(in.readString());
+            this.request = in.readString();
+            this.serviceName = in.readString();
+            this.message = in.readInt();
+        }
+
+        public static ErrorInfo make(UserAction userAction, String serviceName, String request, @StringRes int message) {
+            return new ErrorInfo(userAction, serviceName, request, message);
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeString(this.userAction.name());
+            dest.writeString(this.request);
+            dest.writeString(this.serviceName);
+            dest.writeInt(this.message);
+        }
+    }
+
+    private class IpRangeRequester implements Runnable {
         Handler h = new Handler();
+
         public void run() {
             String ipRange = "none";
             try {
-                Downloader dl = new Downloader();
-                String ip = dl.download("https://ifcfg.me/ip");
+                Downloader dl = Downloader.getInstance();
+                String ip = dl.download("https://ipv4.icanhazip.com");
 
                 ipRange = Parser.matchGroup1("([0-9]*\\.[0-9]*\\.)[0-9]*\\.[0-9]*", ip)
                         + "0.0";
-            } catch(Throwable e) {
-                Log.d(TAG, "Error while error: could not get iprange");
-                e.printStackTrace();
+            } catch (Throwable e) {
+                Log.w(TAG, "Error while error: could not get iprange", e);
             } finally {
-                h.post(new IpRageReturnRunnable(ipRange));
+                h.post(new IpRangeReturnRunnable(ipRange));
             }
         }
     }
 
-
-
-    private class IpRageReturnRunnable implements Runnable {
+    private class IpRangeReturnRunnable implements Runnable {
         String ipRange;
-        public IpRageReturnRunnable(String ipRange) {
+
+        public IpRangeReturnRunnable(String ipRange) {
             this.ipRange = ipRange;
         }
+
         public void run() {
             globIpRange = ipRange;
-            if(infoView != null) {
+            if (infoView != null) {
                 String text = infoView.getText().toString();
                 text += "\n" + globIpRange;
                 infoView.setText(text);
                 reportButton.setEnabled(true);
             }
         }
-    }
-
-    // errorList to StringList
-    private static String[] elToSl(List<Throwable> stackTraces) {
-        String[] out = new String[stackTraces.size()];
-        for(int i = 0; i < stackTraces.size(); i++) {
-            out[i] = getStackTrace(stackTraces.get(i));
-        }
-        return out;
     }
 }
